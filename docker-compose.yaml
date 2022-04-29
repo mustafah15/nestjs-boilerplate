@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+  web:
+    build: .
+    ports:
+        - "3000:3000"
+    env_file:
+        - .env
+    environment: 
+      DATABASE_URL: postgres://user:password@postgres:5432/db
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+     - "35000:5432"
+
