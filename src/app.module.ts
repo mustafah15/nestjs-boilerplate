@@ -16,7 +16,6 @@ import { User } from './auth/user.entity';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get('database'));
         return {
           entities: [User],
           ...configService.get('database'),

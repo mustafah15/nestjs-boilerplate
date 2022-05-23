@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from '../src/app.controller';
+import application from '../src/config/app';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -12,9 +13,12 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('health-check', () => {
+    it('should return succuss and application version', () => {
+      expect(appController.healthCheck()).toMatchObject({
+        succuss: true,
+        version: application.version,
+      });
     });
   });
 });
