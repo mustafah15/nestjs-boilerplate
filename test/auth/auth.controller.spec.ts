@@ -2,30 +2,43 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import supertest from 'supertest';
 import { mock } from 'jest-mock-extended';
-import { getRepositoryToken } from '@nestjs/typeorm';
-
 import { AuthModule } from '../../src/auth/auth.module';
 import { AuthService } from '../../src/auth/auth.service';
+import { ValidationPipe } from '@nestjs/common';
+
 import { AuthController } from '../../src/auth/auth.controller';
 import { AuthCreateUserDto } from '../../src/auth/dtos/auth-create-user.dto';
-import { User } from '../../src/auth/user.entity';
 import { TypeOrmSQLITETestingModule } from '../../src/testing-utils/testing.module';
 import { ConfigModule } from '@nestjs/config';
-import configuration from '../../src/config/secrets';
+import jwtConfig from '../../src/config/jwt.config';
 
 describe('AuthController', () => {
   let app: INestApplication;
   let request: supertest.SuperTest<supertest.Test>;
-  let controller: AuthController;
   const authService = mock<AuthService>();
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [AuthModule, ...TypeOrmSQLITETestingModule()],
+      imports: [
+        AuthModule,
+        ...TypeOrmSQLITETestingModule(),
+        ConfigModule.forRoot({
+          envFilePath: `${process.env.NODE_ENV}.env`,
+          load: [jwtConfig],
+        }),
+      ],
+      providers: [
+        {
+          provide: AuthService,
+          useValue: authService,
+        },
+      ],
       controllers: [AuthController],
     }).compile();
 
     app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
     await app.init();
   });
 
@@ -34,14 +47,25 @@ describe('AuthController', () => {
   });
 
   describe('create new user', () => {
-    it('should return success', () => {
+    it('should return success 201', () => {
       const signupRequestBody: AuthCreateUserDto = {
         firstName: 'test',
         lastName: 'user',
         email: 'test@email.com',
-        password: 'test',
+        password: 'test@!@#T',
       };
-      return request.post('auth/signup').set(signupRequestBody).expect(200);
+
+      return request.post('/auth/signup').send(signupRequestBody).expect(201);
+    });
+
+    it('should return invalid request', () => {
+      const invalidRequestBody = {
+        firstName: 'test',
+        lastName: 'user',
+        email: 'test@email.com',
+      };
+
+      return request.post('/auth/signup').send(invalidRequestBody).expect(400);
     });
   });
 });

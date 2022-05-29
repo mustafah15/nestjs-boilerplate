@@ -6,11 +6,13 @@ import application from './config/app';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   const config = new DocumentBuilder()
     .setTitle(application.name)
     .setDescription(application.description)
     .setVersion(application.version)
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);
 
@@ -19,4 +21,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
+
 bootstrap();

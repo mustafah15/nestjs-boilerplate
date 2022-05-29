@@ -5,10 +5,4 @@ export default () => ({
     secret: process.env.JWT_SECRET,
     signOptions: { expiresIn: process.env.JWT_EXPIRY || 86400 },
   },
-  database: {
-    type: 'postgres',
-    url: process.env.DATABASE_URL,
-    autoLoadEntities: true,
-    synchronize: true,
-  },
 });

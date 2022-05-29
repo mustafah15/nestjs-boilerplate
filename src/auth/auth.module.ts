@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.startegy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import jwtConfig from '../config/jwt.config';
 
 @Module({
   imports: [
@@ -15,9 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        return configService.get('jwt');
-      },
+      useFactory: jwtConfig,
     }),
     TypeOrmModule.forFeature([UserRepository]),
   ],

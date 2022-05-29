@@ -1,26 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 
-import configuration from './config/secrets';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
-import { User } from './auth/user.entity';
+import ormConfig from './config/orm.config';
+import jwtConfig from './config/jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [configuration],
+      envFilePath: `${process.env.NODE_ENV}.env`,
+      load: [ormConfig, jwtConfig],
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        return {
-          entities: [User],
-          ...configService.get('database'),
-        };
-      },
+      useFactory: ormConfig,
     }),
     AuthModule,
   ],
